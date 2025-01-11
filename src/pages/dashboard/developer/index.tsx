@@ -11,6 +11,7 @@ import {
   Settings, Star, MessageSquare
 } from 'lucide-react';
 import EditProfileDialog from '@/components/EditProfileDialog';
+import axiosInstance from "@/lib/axios";
 
 export default function DeveloperDashboard() {
   const [isOnline, setIsOnline] = useState(true);
@@ -53,6 +54,18 @@ export default function DeveloperDashboard() {
     }
   ];
 
+  const handleAvailability = async(availability: string)=>{
+    setIsOnline(!isOnline);
+    const endpoint = '/developer/availability';
+    const payload = {
+      availability: availability,
+    };
+
+    const response = await axiosInstance.post(endpoint, payload);
+    const {message} = response.data;
+    console.log(message);
+  } 
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -68,7 +81,7 @@ export default function DeveloperDashboard() {
               <div className="flex items-center gap-2">
                 <Switch
                   checked={isOnline}
-                  onCheckedChange={setIsOnline}
+                  onCheckedChange={()=>{handleAvailability(isOnline ? "Offline" : "Online")}}
                 />
                 <span className={`text-sm ${isOnline ? 'text-green-600' : 'text-muted-foreground'}`}>
                   {isOnline ? 'Online' : 'Offline'}
