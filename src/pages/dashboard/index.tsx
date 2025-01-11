@@ -44,6 +44,8 @@ export default function ClientDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    localStorage.getItem("role") !== "client" && window.location.replace("/dashboard/developer");
+    
     const fetchData = async () => {
       try {
         setIsLoading(true);

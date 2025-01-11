@@ -23,14 +23,6 @@ declare global {
   }
 }
 
-interface AuthResponse {
-  token: string;
-  user: {
-    email: string;
-    role: "developer" | "client";
-  };
-}
-
 interface FormData {
   email: string;
   password: string;
@@ -89,16 +81,15 @@ export default function AuthPage() {
   };
 
   // In your handleSubmit function in src/pages/auth.tsx
-  const handleSubmit = async (
-    e: React.FormEvent,
-    role: "client" | "developer"
+  const handleClientSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
     try {
-      const endpoint = authType === "login" ? "/auth/login" : "/auth/signup"; // Remove /api prefix
+      const endpoint = authType === "login" ? "/auth/client/login" : "/auth/client/signup"; // Remove /api prefix
       const payload =
         authType === "login"
           ? {
@@ -108,36 +99,63 @@ export default function AuthPage() {
           : {
               email: formData.email,
               password: formData.password,
-              role,
-              name: formData.name,
-              walletAddress: formData.walletAddress,
-              ...(role === "developer"
-                ? {
-                    hourlyRate: parseFloat(
-                      formData.hourlyRate?.toString() || "0"
-                    ),
-                    title: formData.title,
-                  }
-                : {
-                    company: formData.company,
-                  }),
+              fullName: formData.name,
+              comapny: formData.company,
             };
 
-      const response = await axiosInstance.post<AuthResponse>(
+      const response = await axiosInstance.post(
         endpoint,
         payload
       );
-      const { token, user } = response.data;
+      const { token } = response.data;
 
+      localStorage.setItem("role", "client");
       saveAuthToken(token);
 
-      if (user.role === "developer") {
-        navigate("/dashboard/developer");
-      } else {
-        navigate("/dashboard");
-      }
+      navigate("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.error || "An error occurred");
+      setError(err.response?.data?.message || "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeveloperSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const endpoint = authType === "login" ? "/auth/developer/login" : "/auth/developer/signup"; // Remove /api prefix
+      const payload =
+        authType === "login"
+          ? {
+              email: formData.email,
+              password: formData.password,
+            }
+          : {
+              email: formData.email,
+              password: formData.password,
+              fullName: formData.name,
+              title: formData.title,
+              hourlyRate: formData.hourlyRate,
+              walletAddress: formData.walletAddress,
+            };
+
+      const response = await axiosInstance.post(
+        endpoint,
+        payload
+      );
+      const { token } = response.data;
+
+      localStorage.setItem("role", "developer");
+      saveAuthToken(token);
+
+      navigate("/dashboard/developer");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "An error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -177,7 +195,7 @@ export default function AuthPage() {
 
             <TabsContent value="client">
               <form
-                onSubmit={(e) => handleSubmit(e, "client")}
+                onSubmit={handleClientSubmit}
                 className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="client-email">Email</Label>
@@ -206,39 +224,12 @@ export default function AuthPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="wallet">Wallet Address</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="wallet"
-                          name="walletAddress"
-                          type="text"
-                          value={formData.walletAddress}
-                          onChange={handleInputChange}
-                          placeholder="0x..."
-                          required
-                          disabled
-                          className="flex-1"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={connectWallet}
-                          disabled={isLoading}
-                          className="gap-2">
-                          <Wallet className="h-4 w-4" />
-                          {formData.walletAddress
-                            ? "Connected"
-                            : "Connect Wallet"}
-                        </Button>
-                      </div>
-                      {!window.ethereum && (
-                        <p className="text-sm text-destructive">
-                          Please install MetaMask to connect your wallet
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="client-company">Company</Label>
+                      <Label htmlFor="client-company">
+                        Company{" "}
+                        <span className="text-gray-500 text-xs">
+                          (optional)
+                        </span>
+                      </Label>
                       <Input
                         id="client-company"
                         name="company"
@@ -279,7 +270,7 @@ export default function AuthPage() {
 
             <TabsContent value="developer">
               <form
-                onSubmit={(e) => handleSubmit(e, "developer")}
+                onSubmit={handleDeveloperSubmit}
                 className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="dev-email">Email</Label>
