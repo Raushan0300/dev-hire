@@ -1,6 +1,7 @@
 import { Video, Bitcoin, Calendar, Star, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { useNavigate } from 'react-router-dom';
 
 const featuredDevs = [
   {
@@ -30,6 +31,15 @@ const featuredDevs = [
 ];
 
 function Home() {
+  const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   const token = getAuthToken();
+  //   if (!token) {
+  //     navigate('/auth');
+  //   }
+  // }, [navigate]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -38,7 +48,7 @@ function Home() {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-5xl font-bold mb-6">Instant Developer Consultations</h1>
             <p className="text-xl mb-8 text-gray-300">Connect with expert developers instantly through video calls. Pay with crypto. Get solutions now.</p>
-            <Button size="lg" className="inline-flex items-center bg-white text-black hover:bg-gray-100">
+            <Button size="lg" className="inline-flex items-center bg-white text-black hover:bg-gray-100" onClick={() => navigate('/dashboard')}>
               Find a Developer
               <ChevronRight className="ml-2 h-5 w-5" />
             </Button>
@@ -115,10 +125,10 @@ function Home() {
           <h2 className="text-3xl font-bold mb-4">Ready to get started?</h2>
           <p className="mb-8 text-gray-300">Join our platform and connect with expert developers today</p>
           <div className="flex justify-center gap-4">
-            <Button variant="secondary" size="lg">
+            <Button variant="secondary" size="lg" onClick={() => navigate('/dashboard')}>
               Find a Developer
             </Button>
-            <Button variant="secondary" size="lg" className='bg-transparent text-white hover:text-black'>
+            <Button variant="secondary" size="lg" className='bg-transparent text-white hover:text-black' onClick={() => navigate('/dashboard/developer')}>
               Become a Developer
             </Button>
           </div>

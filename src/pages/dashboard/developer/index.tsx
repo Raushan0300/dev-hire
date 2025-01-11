@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { 
   Video, Clock, Wallet, Calendar as CalendarIcon, 
-  Settings, Star, Power, MessageSquare
+  Settings, Star, MessageSquare
 } from 'lucide-react';
+import EditProfileDialog from '@/components/EditProfileDialog';
 
 export default function DeveloperDashboard() {
   const [isOnline, setIsOnline] = useState(true);
@@ -225,9 +226,19 @@ export default function DeveloperDashboard() {
                   </div>
                 </div>
                 <div className="mt-6 space-y-2">
-                  <Button variant="outline" className="w-full">
-                    Edit Profile
-                  </Button>
+                  <EditProfileDialog profile={
+                    {
+                      name: 'Sarah Chen',
+                      title: 'Full Stack Developer',
+                      hourlyRate: '0.015',
+                      bio: 'Experienced full stack developer specializing in React and Node.js',
+                      skills: 'React, Node.js, TypeScript',
+                      image: '/api/placeholder/100/100',
+                      timezone: 'UTC-8'
+                    }
+                  } onSave={
+                    (data) => console.log(data)
+                  } />
                   <Button variant="outline" className="w-full">
                     View Public Profile
                   </Button>
