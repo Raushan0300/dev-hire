@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,12 @@ import {
 import EditProfileDialog from '@/components/EditProfileDialog';
 import axiosInstance from "@/lib/axios";
 
+
+
 export default function DeveloperDashboard() {
   const [isOnline, setIsOnline] = useState(true);
   const [date, setDate] = useState<Date>(new Date());
+  const [developerProfile, setDeveloperProfile] = useState<any | null>(null);
 
   // Mock data
   const upcomingCalls = [
@@ -54,6 +57,17 @@ export default function DeveloperDashboard() {
     }
   ];
 
+useEffect(()=>{
+  const showProfile = async()=>{  
+    const endpoint = '/developer/profile';
+    const response = await axiosInstance.get(endpoint);
+    const developerProfile = response.data;
+    setDeveloperProfile(developerProfile);
+
+  }
+  showProfile();
+},[]);
+
   const handleAvailability = async(availability: string)=>{
     setIsOnline(!isOnline);
     const endpoint = '/developer/availability';
@@ -64,6 +78,8 @@ export default function DeveloperDashboard() {
     const response = await axiosInstance.post(endpoint, payload);
     const {message} = response.data;
     console.log(message);
+
+
   } 
 
   return (
@@ -225,17 +241,19 @@ export default function DeveloperDashboard() {
                 <div className="text-center">
                   <Avatar className="h-24 w-24 mx-auto mb-4">
                     <AvatarImage src="/api/placeholder/100/100" />
-                    <AvatarFallback>SC</AvatarFallback>
+                    <AvatarFallback> {developerProfile?.fullName
+      ? `${developerProfile.fullName.split(' ')[0][0]}${developerProfile.fullName.split(' ')[1][0]}`
+      : ''}</AvatarFallback>
                   </Avatar>
-                  <h2 className="text-xl font-semibold">Sarah Chen</h2>
-                  <p className="text-sm text-muted-foreground">Full Stack Developer</p>
+                  <h2 className="text-xl font-semibold">{developerProfile?.fullName}</h2>
+                  <p className="text-sm text-muted-foreground">{developerProfile?.title}</p>
                   <div className="flex items-center justify-center mt-2">
                     <Star className="h-4 w-4 fill-current" />
-                    <span className="ml-1 font-semibold">4.9</span>
-                    <span className="text-sm text-muted-foreground ml-1">(127 reviews)</span>
+                    <span className="ml-1 font-semibold">{developerProfile?.rating}</span>
+                    <span className="text-sm text-muted-foreground ml-1">({developerProfile?.reviewCount})</span>
                   </div>
                   <div className="mt-4">
-                    <Badge>0.015 ETH/hr</Badge>
+                    <Badge>{developerProfile?.hourlyRate/10000} ETH/hr</Badge>
                   </div>
                 </div>
                 <div className="mt-6 space-y-2">
@@ -260,7 +278,7 @@ export default function DeveloperDashboard() {
             </Card>
 
             {/* Stats Card */}
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Statistics</CardTitle>
               </CardHeader>
@@ -284,7 +302,7 @@ export default function DeveloperDashboard() {
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </div>
