@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import developerUser from "../models/Developer.js";
 
+import DeveloperProfile from "../models/DeveloperProfile.js";
+
 export const developerSignupController = async (req: Request, res: Response) => {
     const { email, password, fullName, walletAddress, title, hourlyRate } = req.body;
 
@@ -28,8 +30,19 @@ export const developerSignupController = async (req: Request, res: Response) => 
             title,
             hourlyRate: hourlyRate * 10000,
             walletAddress,
+
         });
+
         await newDeveloper.save();
+        const newDeveloperProfile = new DeveloperProfile({
+            user: newDeveloper._id,
+            fullName,
+            title,
+            hourlyRate: hourlyRate * 10000,
+
+
+        });
+        await newDeveloperProfile.save();
 
         if (!process.env.JWT_SECRET) {
             throw new Error("JWT_SECRET is not defined");
