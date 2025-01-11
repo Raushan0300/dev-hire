@@ -7,7 +7,7 @@ const developerProfileSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    name: {
+    fullName: {
       type: String,
       required: true,
     },
@@ -16,8 +16,8 @@ const developerProfileSchema = new mongoose.Schema(
       required: true,
     },
     bio: {
-      type: String,
-      required: true,
+      type: String
+  
     },
     skills: [
       {
@@ -34,7 +34,7 @@ const developerProfileSchema = new mongoose.Schema(
     },
     timezone: {
       type: String,
-      required: true,
+    
     },
     languages: [
       {
@@ -45,8 +45,8 @@ const developerProfileSchema = new mongoose.Schema(
     yearsOfExperience: Number,
     availability: {
       type: String,
-      enum: ["Available", "Busy", "Away", "Offline"],
-      default: "Available",
+      enum: ["Online", "Busy", "Away", "Offline"],
+      default: "Online",
     },
     rating: {
       type: Number,
