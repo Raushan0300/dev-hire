@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from "../models/User.js";
+import User from "../models/Developer.js";
 import ClientProfile from "../models/ClientProfile.js";
 import DeveloperProfile from "../models/DeveloperProfile.js";
 import Joi from "joi";
