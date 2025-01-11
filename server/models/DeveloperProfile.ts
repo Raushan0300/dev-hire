@@ -74,5 +74,8 @@ const developerProfileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const DeveloperProfile = mongoose.model('DeveloperProfile', developerProfileSchema);
+const DeveloperProfile = mongoose.model(
+  "DeveloperProfile",
+  developerProfileSchema
+);
 export default DeveloperProfile;

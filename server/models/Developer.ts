@@ -1,49 +1,32 @@
 import mongoose from "mongoose";
 
-const developerSchema = new mongoose.Schema(
-  {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-      index: true
-  },
-
+const developerSchema = new mongoose.Schema({
   email: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-
-  },
-    password: {
-      type: String,
-      required: [true, "Password is required"],
-    },
-   fullName:{
     type: String,
     required: true,
-    trim: true,
-    index: true
-   },
-    walletAddress: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    lastLogin: {
-      type: Date,
-    },
+    unique: true,
   },
-  { timestamps: true }
-);
+  password: {
+    type: String,
+    required: true,
+  },
+  fullName: {
+    type: String,
+    required: true,
+  },
+  title: {
+    type: String,
+    required: true,
+  },
+  hourlyRate: {
+    type: Number,
+    required: true,
+  },
+  walletAddress: {
+    type: String,
+    required: true,
+  },
+});
 
 const developerUser = mongoose.model("developerUser", developerSchema);
 export default developerUser;

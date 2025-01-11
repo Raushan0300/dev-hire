@@ -1,53 +1,23 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt"
 
-const clientSchema = new mongoose.Schema(
-  {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-      index: true
-  },
-
+const clientSchema = new mongoose.Schema({
   email: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-
-  },
-    password: {
-      type: String,
-      required: [true, "Password is required"],
-    },
-   fullName:{
     type: String,
     required: true,
-    trim: true,
-    index: true
-   },
-   
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    lastLogin: {
-      type: Date,
-    },
+    unique: true,
   },
-  { timestamps: true }
-);
-
-clientSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-})
+  password: {
+    type: String,
+    required: true,
+  },
+  fullName: {
+    type: String,
+    required: true,
+  },
+  company: {
+    type: String,
+  }
+});
 
 const clientUser = mongoose.model("clientUser", clientSchema);
 export default clientUser;
