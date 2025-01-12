@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
-mongoose.connect("mongodb://localhost:27017/devhire").then(() => {
+const MONGO_URI:string = process.env.MONGO_URI as string || "mongodb://localhost:27017/devhire";
+
+mongoose.connect(MONGO_URI).then(() => {
     console.log("Connected to database");
     }
 ).catch((error) => {

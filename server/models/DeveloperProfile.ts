@@ -11,13 +11,16 @@ const developerProfileSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    email: {
+      type: String,
+      required: true,
+    },
     title: {
       type: String,
       required: true,
     },
     bio: {
-      type: String
-  
+      type: String,
     },
     skills: [
       {
@@ -32,10 +35,7 @@ const developerProfileSchema = new mongoose.Schema(
     image: {
       type: String,
     },
-    timezone: {
-      type: String,
-    
-    },
+    timezone: String,
     languages: [
       {
         type: String,

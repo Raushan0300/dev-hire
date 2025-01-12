@@ -7,22 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Video, Clock, Wallet, Search, Star, Phone, Users, History } from 'lucide-react';
 import axiosInstance from "@/lib/axios";
-
-interface ClientProfile {
-  name: string;
-  company?: string;
-  totalSpent: number;
-  completedCalls: number;
-}
-
-interface Developer {
-  name: string;
-  title: string;
-  hourlyRate: number;
-  availability: string;
-  rating: number;
-  image?: string;
-}
+import { useNavigate } from 'react-router-dom';
 
 interface Booking {
   developer: {
@@ -37,8 +22,9 @@ interface Booking {
 }
 
 export default function ClientDashboard() {
-  const [profile, setProfile] = useState<ClientProfile | null>(null);
-  const [developers, setDevelopers] = useState<Developer[]>([]);
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState<any>(null);
+  const [developers, setDevelopers] = useState<any[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,17 +37,17 @@ export default function ClientDashboard() {
         setIsLoading(true);
         setError(null);
         
-        const [profileRes, developersRes, bookingsRes] = await Promise.all([
-          axiosInstance.get<{ data: ClientProfile }>('/client/profile'),
-          axiosInstance.get<{ data: Developer[] }>('/client/developers'),
-          axiosInstance.get<{ data: Booking[] }>('/client/bookings')
+        const [profileRes, developersRes] = await Promise.all([
+          axiosInstance.get('/client/profile'),
+          axiosInstance.get('/client/developers'),
+          // axiosInstance.get<{ data: Booking[] }>('/client/bookings')
         ]);
 
-        setProfile(profileRes.data.data);
-        setDevelopers(developersRes.data.data || []);
-        setBookings(bookingsRes.data.data || []);
+        setProfile(profileRes?.data);
+        setDevelopers(developersRes?.data || []);
+        // setBookings(bookingsRes.data.data || []);
       } catch (err: any) {
-        setError(err.response?.data?.error || 'Failed to load dashboard data');
+        setError(err.response?.data?.message || 'Failed to load dashboard data');
         setDevelopers([]);
         setBookings([]);
       } finally {
@@ -107,7 +93,7 @@ export default function ClientDashboard() {
       </div>
       <h3 className="font-semibold mb-1">{title}</h3>
       <p className="text-sm text-muted-foreground mb-4">{description}</p>
-      <Button>
+      <Button onClick={()=>navigate('/dashboard/find')}>
         <Search className="h-4 w-4 mr-2" />
         Browse Developers
       </Button>
@@ -121,14 +107,14 @@ export default function ClientDashboard() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">Welcome back, {profile?.name}</p>
+            <p className="text-muted-foreground">Welcome back, {profile?.fullName}</p>
           </div>
           <div className="flex gap-4">
             <Button variant="outline" className="gap-2">
               <Wallet className="h-4 w-4" />
               {profile?.totalSpent.toFixed(3)} ETH Spent
             </Button>
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={()=>navigate('/dashboard/find')}>
               <Search className="h-4 w-4" />
               Find Developers
             </Button>
@@ -201,12 +187,12 @@ export default function ClientDashboard() {
                       <div className="flex items-center gap-4">
                         <Avatar className="h-12 w-12">
                           <AvatarImage src={dev.image} />
-                          <AvatarFallback>{dev.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          <AvatarFallback>{dev.fullName.split(' ').map((n:any) => n[0]).join('')}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
-                            <h3 className="font-semibold">{dev.name}</h3>
-                            <Badge variant={dev.availability === "Available" ? "default" : "secondary"}>
+                            <h3 className="font-semibold">{dev.fullName}</h3>
+                            <Badge variant={dev.availability === "Online" ? "default" : "secondary"}>
                               {dev.availability}
                             </Badge>
                           </div>
@@ -216,19 +202,19 @@ export default function ClientDashboard() {
                               <Star className="h-4 w-4 fill-current" />
                               <span className="ml-1 text-sm">{dev.rating}</span>
                             </div>
-                            <span className="font-semibold">{dev.hourlyRate} ETH/hr</span>
+                            <span className="font-semibold">{(dev.hourlyRate/10000).toFixed(3)} ETH/hr</span>
                           </div>
                         </div>
                       </div>
                       <div className="mt-4 flex gap-2">
                         <Button 
                           className="w-full gap-2" 
-                          disabled={dev.availability !== "Available"}
+                          disabled={dev.availability !== "Online"}
                         >
                           <Phone className="h-4 w-4" />
                           Book Now
                         </Button>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={()=>navigate(`/dashboard/developer/profile?email=${dev.email}`)}>
                           View Profile
                         </Button>
                       </div>

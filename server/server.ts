@@ -3,7 +3,11 @@ import "dotenv/config.js";
 
 import clientAuthRoute from "./routes/client.auth.js";
 import developerAuthRoute from './routes/developer.auth.js';
-import developerAvailabilityRoute from './routes/developer.route.js';
+import developerRoute from './routes/developer.route.js';
+
+import clientRoute from './routes/client.route.js';
+
+import developerPublicProfileRoute from './routes/public.developer.profile.js';
 
 const app = express();
 app.use(express.json());
@@ -17,7 +21,9 @@ app.get("/", (_, res: Response) => {
 
 app.use("/auth/client", clientAuthRoute);
 app.use("/auth/developer", developerAuthRoute);
-app.use("/developer", developerAvailabilityRoute);
+app.use("/developer", developerRoute);
+app.use("/client", clientRoute);
+app.use("/public", developerPublicProfileRoute);
 
 
 export default app;

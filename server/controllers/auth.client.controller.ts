@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import clientUser from "../models/Client.js";
+import ClientProfile from "../models/ClientProfile.js";
 
 export const clientSignupController = async (req: Request, res: Response) => {
   const { email, password, fullName, company } = req.body;
@@ -28,6 +29,15 @@ export const clientSignupController = async (req: Request, res: Response) => {
       company,
     });
     await newClient.save();
+
+    const newClientProfile = new ClientProfile({
+      user: newClient._id,
+      email,
+      fullName,
+      company,
+    })
+
+    await newClientProfile.save();
 
     if (!process.env.JWT_SECRET) {
       throw new Error("JWT_SECRET is not defined");
