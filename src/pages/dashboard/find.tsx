@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axiosInstance from '@/lib/axios.ts';
 import { Search, Sliders, Star, Clock, Wallet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,29 +15,39 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const FindDeveloper = () => {
-  const [priceRange, setPriceRange] = useState([0]);
+interface Developer {
+  image: string;
+  fullName: string;
+  availability: string;
+  title: string;
+  rating: number;
+  hourlyRate: number;
+  skills: string[];
+}
 
-  const developers = [
-    {
-      name: 'Sarah Chen',
-      title: 'Senior Full Stack Developer',
-      rating: 4.9,
-      hourlyRate: 0.5,
-      availability: 'Available',
-      skills: ['React', 'Node.js', 'TypeScript'],
-      image: '/api/placeholder/150/150'
-    },
-    {
-      name: 'Michael Park',
-      title: 'Blockchain Developer',
-      rating: 4.8,
-      hourlyRate: 0.7,
-      availability: 'Busy',
-      skills: ['Solidity', 'Web3', 'Smart Contracts'],
-      image: '/api/placeholder/150/150'
-    }
-  ];
+const FindDeveloper = () => {
+  const [priceRange, setPriceRange] = useState([0, 2]);
+  const [expertise, setExpertise] = useState('');
+  const [developers, setDevelopers] = useState<Developer[]>([]);
+
+  useEffect(() => {
+    const fetchDevelopers = async () => {
+      try {
+        const response = await axiosInstance.get('/developers/find-developer', {
+          params: {
+            hourlyRate: `${priceRange[0]}-${priceRange[1]}`,
+            expertise,
+          },
+        });
+        console.log('Response data:', response.data); // Debugging line
+        setDevelopers(response.data);
+      } catch (error) {
+        console.error('Error fetching developers:', error);
+      }
+    };
+
+    fetchDevelopers();
+  }, [priceRange, expertise]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -61,7 +72,7 @@ const FindDeveloper = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Select>
+                <Select onValueChange={setExpertise}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Expertise" />
                   </SelectTrigger>
@@ -88,7 +99,7 @@ const FindDeveloper = () => {
                   step={0.1}
                   className="w-[200px]"
                 />
-                <span className="text-sm text-gray-600">Up to {priceRange[0]} ETH</span>
+                <span className="text-sm text-gray-600">From {priceRange[0]} to {priceRange[1]} ETH</span>
               </div>
             </div>
           </CardContent>
@@ -102,12 +113,12 @@ const FindDeveloper = () => {
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16">
                     <AvatarImage src={dev.image} />
-                    <AvatarFallback>{dev.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    <AvatarFallback>{dev.fullName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-black">{dev.name}</h3>
-                      <Badge variant={dev.availability === "Available" ? "default" : "secondary"}>
+                      <h3 className="font-semibold text-black">{dev.fullName}</h3>
+                      <Badge variant={dev.availability === "Online" ? "default" : "secondary"}>
                         {dev.availability}
                       </Badge>
                     </div>
@@ -140,7 +151,7 @@ const FindDeveloper = () => {
                   <Button 
                     variant="outline" 
                     className="w-full"
-                    disabled={dev.availability !== "Available"}
+                    disabled={dev.availability !== "Online"}
                   >
                     Book Call
                   </Button>
