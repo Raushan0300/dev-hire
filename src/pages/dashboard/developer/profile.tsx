@@ -17,25 +17,10 @@ import axiosInstance from "@/lib/axios";
 import { useLocation } from "react-router-dom";
 
 const PublicProfile = () => {
-  // Mock data - in a real app, this would come from an API
-  // const developer = {
-  //   name: "Sarah Chen",
-  //   title: "Full Stack Developer",
-  //   image: "/api/placeholder/100/100",
-  //   hourlyRate: "0.015",
-  //   rating: 4.9,
-  //   reviewCount: 127,
-  //   bio: "Full stack developer with 5+ years of experience specializing in React, Node.js, and TypeScript. I help teams build scalable web applications and solve complex technical challenges.",
-  //   skills: ["React", "Node.js", "TypeScript", "Python", "AWS", "Docker"],
-  //   timezone: "UTC-8",
-  //   languages: ["English", "Mandarin"],
-  //   availability: "Available next week",
-  //   github: "github.com/sarahchen",
-  //   email: "sarah.chen@example.com",
-  // };
   const location = useLocation();
 
   const [developer, setDeveloper] = useState<any>({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const reviews = [
     {
@@ -65,17 +50,28 @@ const PublicProfile = () => {
     const developerEmail = query.get('email');
 
     const fetchProfile = async()=>{
+      setIsLoading(true);
       try {
         const {data} = await axiosInstance.get(`/public/developer/${developerEmail}`);
         setDeveloper(data);
         console.log(data);
       } catch (error) {
         console.log(error);
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchProfile();
 
-  },[])
+  },[]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -97,7 +93,7 @@ const PublicProfile = () => {
                   <span className="text-gray-300 ml-1">({developer?.reviewCount} reviews)</span>
                 </div>
                 <Badge variant="secondary" className="text-sm">
-                  {developer?.hourlyRate} ETH/hr
+                  {(developer?.hourlyRate/10000).toFixed(3)} ETH/hr
                 </Badge>
                 <Badge variant="outline" className="text-white border-white">
                   <Globe className="h-4 w-4 mr-1" />

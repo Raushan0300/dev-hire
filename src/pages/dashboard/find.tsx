@@ -1,23 +1,25 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '@/lib/axios.ts';
-import { Search, Sliders, Star, Clock, Wallet } from 'lucide-react';
+import { Search, Star, Clock, Wallet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from '@/components/ui/select';
+import { useNavigate } from 'react-router-dom';
 
 interface Developer {
   image: string;
   fullName: string;
+  email: string;
   availability: string;
   title: string;
   rating: number;
@@ -26,28 +28,37 @@ interface Developer {
 }
 
 const FindDeveloper = () => {
+  const navigate = useNavigate();
+
   const [priceRange, setPriceRange] = useState([0, 2]);
-  const [expertise, setExpertise] = useState('');
+  // const [expertise, setExpertise] = useState('');
   const [developers, setDevelopers] = useState<Developer[]>([]);
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchDevelopers = async () => {
+      setIsLoading(true);
       try {
-        const response = await axiosInstance.get('/developers/find-developer', {
-          params: {
-            hourlyRate: `${priceRange[0]}-${priceRange[1]}`,
-            expertise,
-          },
-        });
-        console.log('Response data:', response.data); // Debugging line
+        const response = await axiosInstance.get('/developer/find-developer');
         setDevelopers(response.data);
       } catch (error) {
         console.error('Error fetching developers:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchDevelopers();
-  }, [priceRange, expertise]);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -71,7 +82,7 @@ const FindDeveloper = () => {
                   />
                 </div>
               </div>
-              <div className="flex gap-2">
+              {/* <div className="flex gap-2">
                 <Select onValueChange={setExpertise}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Expertise" />
@@ -86,7 +97,7 @@ const FindDeveloper = () => {
                   <Sliders className="h-4 w-4" />
                   Filters
                 </Button>
-              </div>
+              </div> */}
             </div>
 
             <div className="mt-6">
@@ -147,7 +158,7 @@ const FindDeveloper = () => {
                   </div>
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <Button className="w-full">View Profile</Button>
+                  <Button className="w-full" onClick={()=>navigate(`/dashboard/developer/profile?email=${dev.email}`)}>View Profile</Button>
                   <Button 
                     variant="outline" 
                     className="w-full"
