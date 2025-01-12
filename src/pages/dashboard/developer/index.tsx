@@ -14,12 +14,49 @@ import EditProfileDialog from '@/components/EditProfileDialog';
 import axiosInstance from "@/lib/axios";
 import { useNavigate } from 'react-router-dom';
 
+// Add these interfaces at the top
+interface TimeSlot {
+  date: Date;
+  time: string[];
+}
+
+interface Unavailability {
+  timeSlots: TimeSlot[];
+}
+
 export default function DeveloperDashboard() {
   const navigate = useNavigate();
 
   const [isOnline, setIsOnline] = useState(true);
-  const [date, setDate] = useState<Date>(new Date());
+  // const [date, setDate] = useState<Date>(new Date());
   const [developerProfile, setDeveloperProfile] = useState<any | null>(null);
+
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
+  const [unavailability, setUnavailability] = useState<Unavailability | null>(null);
+
+  // const [selectedTime, setSelectedTime] = useState("");
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const generateTimeSlots = (selectedDate: Date | undefined) => {
+    const slots = [];
+    const now = new Date();
+    const isToday = selectedDate?.toDateString() === now.toDateString();
+
+    let startHour = isToday ? now.getHours() + 1 : 0;
+    const endHour = 23;
+
+    for (let hour = startHour; hour <= endHour; hour++) {
+      const time = new Date(selectedDate || now);
+      time.setHours(hour, 0, 0, 0);
+      slots.push(time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }));
+    }
+
+    return slots;
+  };
+
+  // const timeSlots = generateTimeSlots(selectedDate);
 
   // Mock data
   const upcomingCalls = [
@@ -58,16 +95,43 @@ export default function DeveloperDashboard() {
     }
   ];
 
+  useEffect(() => {
+    const fetchUnavailability = async () => {
+      try {
+        const response = await axiosInstance.get('/developer/unavailability');
+        setUnavailability(response.data.unavailability);
+      } catch (error) {
+        console.error('Error fetching unavailability:', error);
+      }
+    };
+
+    fetchUnavailability();
+  }, []);
+
 useEffect(()=>{
   const showProfile = async()=>{  
+    setIsLoading(true);
     const endpoint = '/developer/profile';
     const response = await axiosInstance.get(endpoint);
     const developerProfile = response.data;
+    setIsOnline(developerProfile.availability === "Online");
     setDeveloperProfile(developerProfile);
 
+    // Unavailibity
+
+    setIsLoading(false);
   }
   showProfile();
 },[]);
+
+const handleSelectTimes = (time: string) => {
+  // setSelectedTime(time);
+  if (selectedTimes.includes(time)) {
+    setSelectedTimes(selectedTimes.filter((t) => t !== time));
+  } else {
+    setSelectedTimes([...selectedTimes, time]);
+  }
+};
 
   const handleAvailability = async(availability: string)=>{
     setIsOnline(!isOnline);
@@ -77,7 +141,46 @@ useEffect(()=>{
     };
 
     await axiosInstance.post(endpoint, payload);
-  } 
+  };
+
+
+  const handleSetUnavailability = async () => {
+    try {
+      const payload = {
+        date: selectedDate,
+        times: selectedTimes.filter(time => time !== ""),
+      };
+
+      const response = await axiosInstance.post('/developer/set-unavailability', payload);
+      
+      if (response.data.unavailability) {
+        setUnavailability(response.data.unavailability);
+      }
+
+      // Clear selection after successful update
+      setSelectedTimes([]);
+    } catch (error) {
+      console.error('Error setting unavailability:', error);
+    }
+  };
+
+  const isTimeSlotUnavailable = (time: string) => {
+    if (!unavailability) return false;
+
+    const todaySlot = unavailability.timeSlots.find(
+      slot => new Date(slot.date).toDateString() === selectedDate.toDateString()
+    );
+
+    return todaySlot?.time.includes(time) || false;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -103,7 +206,7 @@ useEffect(()=>{
             </div>
             <Button variant="outline" className="gap-2">
               <Wallet className="h-4 w-4" />
-              1.25 ETH Earned
+              {developerProfile?.totalEarnings} ETH Earned
             </Button>
             <Button variant="outline" className="gap-2">
               <Settings className="h-4 w-4" />
@@ -167,29 +270,45 @@ useEffect(()=>{
               </TabsList>
 
               <TabsContent value="availability" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Set Your Availability</CardTitle>
-                    <CardDescription>Mark your available time slots</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={(date) => date && setDate(date)}
-                      className="rounded-md border"
-                    />
-                    <div className="mt-4 grid grid-cols-4 gap-2">
-                      {['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', 
-                        '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'].map((time) => (
-                        <Button key={time} variant="outline" className="w-full">
-                          {time}
-                        </Button>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+      <Card>
+        <CardHeader>
+          <CardTitle>Set Your Unavailability</CardTitle>
+          <CardDescription>Mark your unavailable time slots</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={(date) => date && setSelectedDate(date)}
+            className="rounded-md border"
+            disabled={date => date < new Date(new Date().setHours(0, 0, 0, 0))}
+          />
+          <div className="mt-4 grid grid-cols-4 gap-2">
+            {generateTimeSlots(selectedDate).map((time) => (
+              <Button 
+                key={time} 
+                variant="outline"
+                className={`
+                  ${selectedTimes.includes(time) ? 'bg-red-500 text-white hover:bg-red-600' : ''}
+                  ${isTimeSlotUnavailable(time) ? 'bg-gray-200 cursor-not-allowed' : ''}
+                `}
+                onClick={() => handleSelectTimes(time)}
+                disabled={isTimeSlotUnavailable(time)}
+              >
+                {time}
+              </Button>
+            ))}
+          </div>
+          <Button 
+            className="mt-4 w-full" 
+            onClick={handleSetUnavailability}
+            disabled={selectedTimes.length === 0}
+          >
+            Save Unavailability
+          </Button>
+        </CardContent>
+      </Card>
+    </TabsContent>
 
               <TabsContent value="earnings">
                 <Card>
@@ -272,32 +391,6 @@ useEffect(()=>{
               </CardContent>
             </Card>
 
-            {/* Stats Card */}
-            {/* <Card>
-              <CardHeader>
-                <CardTitle>Statistics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Total Earnings</span>
-                    <span className="font-semibold">1.25 ETH</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Completed Calls</span>
-                    <span className="font-semibold">24</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Hours Consulted</span>
-                    <span className="font-semibold">36</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Response Rate</span>
-                    <span className="font-semibold">98%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card> */}
           </div>
         </div>
       </div>

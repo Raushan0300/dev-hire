@@ -43,7 +43,7 @@ export const clientSignupController = async (req: Request, res: Response) => {
       throw new Error("JWT_SECRET is not defined");
     }
     const token = jwt.sign({ id: newClient._id, role: "client" }, process.env.JWT_SECRET, {
-      expiresIn: 3600,
+      expiresIn: "7d",
     });
     res.json({
       token,
@@ -86,7 +86,7 @@ export const clientLoginController = async (req: Request, res: Response) => {
         throw new Error("JWT_SECRET is not defined");
         }
         const token = jwt.sign({ id: client._id, role:"client" }, process.env.JWT_SECRET, {
-        expiresIn: 3600,
+        expiresIn: "7d",
         });
         res.json({
         token,

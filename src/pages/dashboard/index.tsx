@@ -210,6 +210,19 @@ export default function ClientDashboard() {
                         <Button 
                           className="w-full gap-2" 
                           disabled={dev.availability !== "Online"}
+                          onClick={()=>{navigate(`/booking`, {
+                            state: {
+                              email: dev.email,
+                              name: dev.fullName,
+                              title: dev.title,
+                              image: dev.image,
+                              hourlyRate: dev.hourlyRate,
+                              availability: dev.availability,
+                              rating: dev.rating,
+                              reviews: dev.reviewCount,
+                              walletAddress: dev.walletAddress
+                            }
+                          })}}
                         >
                           <Phone className="h-4 w-4" />
                           Book Now

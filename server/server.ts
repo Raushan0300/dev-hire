@@ -9,6 +9,8 @@ import clientRoute from './routes/client.route.js';
 
 import developerPublicProfileRoute from './routes/public.developer.profile.js';
 
+import bookingRoute from './routes/booking.route.js';
+
 const app = express();
 app.use(express.json());
 
@@ -24,6 +26,8 @@ app.use("/auth/developer", developerAuthRoute);
 app.use("/developer", developerRoute);
 app.use("/client", clientRoute);
 app.use("/public", developerPublicProfileRoute);
+
+app.use("/booking", bookingRoute);
 
 
 export default app;
