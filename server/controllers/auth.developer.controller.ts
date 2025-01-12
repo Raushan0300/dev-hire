@@ -48,6 +48,7 @@ export const developerSignupController = async (
       user: newDeveloper._id,
       fullName,
       email,
+      walletAddress,
       title,
       hourlyRate: hourlyRate * 10000,
     });
@@ -61,7 +62,7 @@ export const developerSignupController = async (
       { id: newDeveloper._id, role: "developer" },
       process.env.JWT_SECRET,
       {
-        expiresIn: 3600,
+        expiresIn: "7d",
       }
     );
     
@@ -109,7 +110,7 @@ export const developerLoginController = async (req: Request, res: Response) => {
       { id: developer._id, role: "developer" },
       process.env.JWT_SECRET,
       {
-        expiresIn: 3600,
+        expiresIn:"7d",
       }
     );
     res.json({

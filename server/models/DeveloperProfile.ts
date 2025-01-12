@@ -4,7 +4,7 @@ const developerProfileSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Developer",
       required: true,
     },
     fullName: {
@@ -12,6 +12,10 @@ const developerProfileSchema = new mongoose.Schema(
       required: true,
     },
     email: {
+      type: String,
+      required: true,
+    },
+    walletAddress: {
       type: String,
       required: true,
     },

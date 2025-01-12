@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '@/lib/axios.ts';
-import { Search, Star, Clock, Wallet } from 'lucide-react';
+import { Search, Star, Wallet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -141,12 +141,12 @@ const FindDeveloper = () => {
                       </div>
                       <div className="flex items-center">
                         <Wallet className="h-4 w-4 text-gray-400" />
-                        <span className="ml-1 text-sm font-medium">{dev.hourlyRate} ETH/hr</span>
+                        <span className="ml-1 text-sm font-medium">{dev.hourlyRate/10000} ETH/hr</span>
                       </div>
-                      <div className="flex items-center">
+                      {/* <div className="flex items-center">
                         <Clock className="h-4 w-4 text-gray-400" />
                         <span className="ml-1 text-sm">Available Now</span>
-                      </div>
+                      </div> */}
                     </div>
                     <div className="flex gap-2 mt-3">
                       {dev.skills.map((skill, idx) => (
