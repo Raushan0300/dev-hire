@@ -12,24 +12,30 @@ import {
   Mail,
   Github
 } from 'lucide-react';
+import { useEffect, useState } from "react";
+import axiosInstance from "@/lib/axios";
+import { useLocation } from "react-router-dom";
 
 const PublicProfile = () => {
   // Mock data - in a real app, this would come from an API
-  const developer = {
-    name: "Sarah Chen",
-    title: "Full Stack Developer",
-    image: "/api/placeholder/100/100",
-    hourlyRate: "0.015",
-    rating: 4.9,
-    reviewCount: 127,
-    bio: "Full stack developer with 5+ years of experience specializing in React, Node.js, and TypeScript. I help teams build scalable web applications and solve complex technical challenges.",
-    skills: ["React", "Node.js", "TypeScript", "Python", "AWS", "Docker"],
-    timezone: "UTC-8",
-    languages: ["English", "Mandarin"],
-    availability: "Available next week",
-    github: "github.com/sarahchen",
-    email: "sarah.chen@example.com",
-  };
+  // const developer = {
+  //   name: "Sarah Chen",
+  //   title: "Full Stack Developer",
+  //   image: "/api/placeholder/100/100",
+  //   hourlyRate: "0.015",
+  //   rating: 4.9,
+  //   reviewCount: 127,
+  //   bio: "Full stack developer with 5+ years of experience specializing in React, Node.js, and TypeScript. I help teams build scalable web applications and solve complex technical challenges.",
+  //   skills: ["React", "Node.js", "TypeScript", "Python", "AWS", "Docker"],
+  //   timezone: "UTC-8",
+  //   languages: ["English", "Mandarin"],
+  //   availability: "Available next week",
+  //   github: "github.com/sarahchen",
+  //   email: "sarah.chen@example.com",
+  // };
+  const location = useLocation();
+
+  const [developer, setDeveloper] = useState<any>({});
 
   const reviews = [
     {
@@ -54,6 +60,23 @@ const PublicProfile = () => {
     },
   ];
 
+  useEffect(()=>{
+    const query = new URLSearchParams(location.search);
+    const developerEmail = query.get('email');
+
+    const fetchProfile = async()=>{
+      try {
+        const {data} = await axiosInstance.get(`/public/developer/${developerEmail}`);
+        setDeveloper(data);
+        console.log(data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchProfile();
+
+  },[])
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -61,24 +84,24 @@ const PublicProfile = () => {
         <div className="max-w-5xl mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
             <Avatar className="h-32 w-32">
-              <AvatarImage src={developer.image} />
-              <AvatarFallback>{developer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+              <AvatarImage src={developer?.image} />
+              <AvatarFallback>{developer?.fullName?.split(' ')?.map((n:any) => n[0])?.join('')}</AvatarFallback>
             </Avatar>
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl font-bold text-white">{developer.name}</h1>
-              <p className="text-lg text-gray-300 mt-2">{developer.title}</p>
+              <h1 className="text-3xl font-bold text-white">{developer?.fullName}</h1>
+              <p className="text-lg text-gray-300 mt-2">{developer?.title}</p>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
                 <div className="flex items-center">
                   <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <span className="ml-1 text-white font-semibold">{developer.rating}</span>
-                  <span className="text-gray-300 ml-1">({developer.reviewCount} reviews)</span>
+                  <span className="ml-1 text-white font-semibold">{developer?.rating}</span>
+                  <span className="text-gray-300 ml-1">({developer?.reviewCount} reviews)</span>
                 </div>
                 <Badge variant="secondary" className="text-sm">
-                  {developer.hourlyRate} ETH/hr
+                  {developer?.hourlyRate} ETH/hr
                 </Badge>
                 <Badge variant="outline" className="text-white border-white">
                   <Globe className="h-4 w-4 mr-1" />
-                  {developer.timezone}
+                  {developer?.timezone}
                 </Badge>
               </div>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-6">
@@ -106,11 +129,11 @@ const PublicProfile = () => {
                 <CardTitle>About</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">{developer.bio}</p>
+                <p className="text-gray-600">{developer?.bio}</p>
                 <div className="mt-6">
                   <h3 className="font-semibold mb-3">Skills</h3>
                   <div className="flex flex-wrap gap-2">
-                    {developer.skills.map((skill) => (
+                    {developer?.skills?.map((skill:any) => (
                       <Badge key={skill} variant="secondary">
                         {skill}
                       </Badge>
@@ -162,7 +185,7 @@ const PublicProfile = () => {
               <CardContent>
                 <Badge className="mb-4" variant="outline">
                   <Check className="h-4 w-4 mr-1" />
-                  {developer.availability}
+                  {developer?.availability}
                 </Badge>
                 <Calendar
                   mode="single"
@@ -178,15 +201,15 @@ const PublicProfile = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  <span className="text-sm">{developer.email}</span>
+                  <span className="text-sm">{developer?.email}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Github className="h-4 w-4" />
-                  <span className="text-sm">{developer.github}</span>
+                  <span className="text-sm">{developer?.github}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Globe className="h-4 w-4" />
-                  <span className="text-sm">Languages: {developer.languages.join(', ')}</span>
+                  <span className="text-sm">Languages: {developer?.languages?.join(', ') || ''}</span>
                 </div>
               </CardContent>
             </Card>

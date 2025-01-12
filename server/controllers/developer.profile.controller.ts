@@ -24,7 +24,7 @@ export const developerProfileController = async (req: Request, res: Response) =>
 
 export const updateDeveloperProfileController = async (req: Request, res: Response) => {
     const {id, role} =req.body?.user;
-    const {hourlyRate,fullName,skills, bio, title} = req.body;
+    const {hourlyRate,fullName,skills, bio, title, timezone} = req.body;
     try{
         if(role !== "developer"){
             res.status(400).json({message:"You are not a developer"});
@@ -35,11 +35,12 @@ export const updateDeveloperProfileController = async (req: Request, res: Respon
             res.status(400).json({ message: "Developer not found" });
             return;
         }
-        developerProfile.skills = skills;
+        developerProfile.skills = skills.split(", ");
         developerProfile.bio = bio;
         developerProfile.title = title;
         developerProfile.fullName = fullName;
-        developerProfile.hourlyRate = hourlyRate;
+        developerProfile.hourlyRate = hourlyRate * 10000;
+        developerProfile.timezone = timezone;
         await developerProfile.save();
         res.json({ message: "Profile updated" });
         return;

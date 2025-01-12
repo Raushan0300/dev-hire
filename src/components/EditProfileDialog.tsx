@@ -18,10 +18,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import axiosInstance from '@/lib/axios';
 
 interface EditProfileDialogProps {
     profile?: {
-        name: string;
+        fullName: string;
         title: string;
         hourlyRate: string;
         bio: string;
@@ -29,27 +30,21 @@ interface EditProfileDialogProps {
         image: string;
         timezone: string;
     };
-    onSave?: (data: {
-        name: string;
-        title: string;
-        hourlyRate: string;
-        bio: string;
-        skills: string;
-        image: string;
-        timezone: string;
-    }) => void;
 }
 
-const EditProfileDialog = ({ profile, onSave }: EditProfileDialogProps) => {
+const EditProfileDialog = ({ profile }: EditProfileDialogProps) => {
   const [formData, setFormData] = useState({
-    name: profile?.name || 'Sarah Chen',
-    title: profile?.title || 'Full Stack Developer',
-    hourlyRate: profile?.hourlyRate || '0.015',
-    bio: profile?.bio || 'Experienced full stack developer specializing in React and Node.js',
-    skills: profile?.skills || 'React, Node.js, TypeScript',
-    image: profile?.image || '/api/placeholder/100/100',
-    timezone: profile?.timezone || 'UTC-8',
+    fullName: profile?.fullName || '',
+    title: profile?.title || '',
+    hourlyRate: profile?.hourlyRate || '',
+    bio: profile?.bio || '',
+    skills: profile?.skills || '',
+    image: profile?.image || '',
+    timezone: profile?.timezone || '',
   });
+
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleInputChange = (e:any) => {
     const { name, value } = e.target;
@@ -59,13 +54,19 @@ const EditProfileDialog = ({ profile, onSave }: EditProfileDialogProps) => {
     }));
   };
 
-  const handleSubmit = (e:any) => {
+  const handleSubmit = async(e:React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSave?.(formData);
+    setIsLoading(true);
+    const endpoint = '/developer/update-profile';
+    const response = await axiosInstance.post(endpoint, formData);
+    if(response.status === 200) {
+      setDialogOpen(false);
+    }
+    setIsLoading(false);
   };
 
   return (
-    <Dialog>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full">
           Edit Profile
@@ -79,7 +80,7 @@ const EditProfileDialog = ({ profile, onSave }: EditProfileDialogProps) => {
           <div className="flex justify-center">
             <Avatar className="h-24 w-24">
               <AvatarImage src={formData.image} />
-              <AvatarFallback>{formData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+              <AvatarFallback>{formData.fullName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
             </Avatar>
           </div>
           
@@ -90,7 +91,7 @@ const EditProfileDialog = ({ profile, onSave }: EditProfileDialogProps) => {
                 <Input
                   id="name"
                   name="name"
-                  value={formData.name}
+                  value={formData.fullName}
                   onChange={handleInputChange}
                 />
               </div>
@@ -127,8 +128,19 @@ const EditProfileDialog = ({ profile, onSave }: EditProfileDialogProps) => {
                     <SelectValue placeholder="Select timezone" />
                   </SelectTrigger>
                   <SelectContent>
+                  <SelectItem value="UTC+5:30">India Standard Time (UTC+5:30)</SelectItem>
                     <SelectItem value="UTC-8">Pacific Time (UTC-8)</SelectItem>
                     <SelectItem value="UTC-5">Eastern Time (UTC-5)</SelectItem>
+                    <SelectItem value='UTC-3'>Brasília Time (UTC-3)</SelectItem>
+                    <SelectItem value="UTC-7">Mountain Time (UTC-7)</SelectItem>
+                    <SelectItem value="UTC-6">Central Time (UTC-6)</SelectItem>
+                    <SelectItem value="UTC-4">Atlantic Time (UTC-4)</SelectItem>
+                    <SelectItem value="UTC+2">Eastern European Time (UTC+2)</SelectItem>
+                    <SelectItem value="UTC+3">Moscow Time (UTC+3)</SelectItem>
+                    <SelectItem value="UTC+4">Gulf Standard Time (UTC+4)</SelectItem>
+                    <SelectItem value="UTC+6">Bangladesh Standard Time (UTC+6)</SelectItem>
+                    <SelectItem value="UTC+7">Indochina Time (UTC+7)</SelectItem>
+                    <SelectItem value="UTC+9">Japan Standard Time (UTC+9)</SelectItem>
                     <SelectItem value="UTC+0">UTC</SelectItem>
                     <SelectItem value="UTC+1">Central European Time (UTC+1)</SelectItem>
                     <SelectItem value="UTC+8">China Standard Time (UTC+8)</SelectItem>
@@ -163,7 +175,7 @@ const EditProfileDialog = ({ profile, onSave }: EditProfileDialogProps) => {
             <DialogTrigger asChild>
               <Button variant="outline">Cancel</Button>
             </DialogTrigger>
-            <Button type="submit">Save Changes</Button>
+            {!isLoading ? <Button type="submit">Save Changes</Button> : <Button disabled>Please Wait...</Button>}
           </div>
         </form>
       </DialogContent>

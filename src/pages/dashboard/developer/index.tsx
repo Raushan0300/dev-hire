@@ -12,10 +12,11 @@ import {
 } from 'lucide-react';
 import EditProfileDialog from '@/components/EditProfileDialog';
 import axiosInstance from "@/lib/axios";
-
-
+import { useNavigate } from 'react-router-dom';
 
 export default function DeveloperDashboard() {
+  const navigate = useNavigate();
+
   const [isOnline, setIsOnline] = useState(true);
   const [date, setDate] = useState<Date>(new Date());
   const [developerProfile, setDeveloperProfile] = useState<any | null>(null);
@@ -75,11 +76,7 @@ useEffect(()=>{
       availability: availability,
     };
 
-    const response = await axiosInstance.post(endpoint, payload);
-    const {message} = response.data;
-    console.log(message);
-
-
+    await axiosInstance.post(endpoint, payload);
   } 
 
   return (
@@ -253,24 +250,22 @@ useEffect(()=>{
                     <span className="text-sm text-muted-foreground ml-1">({developerProfile?.reviewCount})</span>
                   </div>
                   <div className="mt-4">
-                    <Badge>{developerProfile?.hourlyRate/10000} ETH/hr</Badge>
+                    <Badge>{(developerProfile?.hourlyRate/10000).toFixed(3)} ETH/hr</Badge>
                   </div>
                 </div>
                 <div className="mt-6 space-y-2">
-                  <EditProfileDialog profile={
+                  {developerProfile && <EditProfileDialog profile={
                     {
-                      name: 'Sarah Chen',
-                      title: 'Full Stack Developer',
-                      hourlyRate: '0.015',
-                      bio: 'Experienced full stack developer specializing in React and Node.js',
-                      skills: 'React, Node.js, TypeScript',
-                      image: '/api/placeholder/100/100',
-                      timezone: 'UTC-8'
+                      fullName: `${developerProfile?.fullName}`,
+                      title: `${developerProfile?.title}`,
+                      hourlyRate: `${developerProfile?.hourlyRate/10000}`,
+                      bio: `${developerProfile?.bio || ''}`,
+                      skills: `${developerProfile?.skills.join(', ')}`,
+                      image: `${developerProfile?.image}`,
+                      timezone: `${developerProfile?.timezone}`,
                     }
-                  } onSave={
-                    (data) => console.log(data)
-                  } />
-                  <Button variant="outline" className="w-full">
+                  } />}
+                  <Button variant="outline" className="w-full" onClick={()=>navigate(`/dashboard/developer/profile?email=${developerProfile?.email}`)}>
                     View Public Profile
                   </Button>
                 </div>

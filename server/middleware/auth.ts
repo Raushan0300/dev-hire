@@ -17,6 +17,6 @@ export const isAuth = (req:Request, res:Response, next:NextFunction)=>{
         req.body.user = decoded;
         next();
     } catch (error) {
-        res.status(400).json({message:"Token is not valid"});
+        res.status(501).json({message:"Token is not valid"});
     }
 };
